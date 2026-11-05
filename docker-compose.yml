@@ -1,0 +1,32 @@
+services:
+  apt-cacher-ng:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: acng-https
+    restart: unless-stopped
+    ports:
+      - "443:443"
+    volumes:
+      - apt_cache:/var/cache/apt-cacher-ng
+      - ./letsencrypt:/etc/letsencrypt:ro
+
+  certbot:
+    image: certbot/certbot:latest
+    container_name: acng-certbot
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./letsencrypt:/etc/letsencrypt
+      - ./letsencrypt-lib:/var/lib/letsencrypt
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        while :; do
+          certbot renew --quiet
+          sleep 12h
+        done
+
+volumes:
+  apt_cache:

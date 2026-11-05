@@ -1,0 +1,20 @@
+#!/bin/sh
+set -u
+D=/etc/letsencrypt/live/testaptmirror.dev-dom.oraclesiebelcrm.com
+PREVIOUS=''
+while :; do
+  if [ -r "$D/fullchain.pem" ] && [ -r "$D/privkey.pem" ]; then
+    CURRENT=$(sha256sum "$D/fullchain.pem" "$D/privkey.pem" | sha256sum | cut -d' ' -f1)
+    if [ -n "$PREVIOUS" ] && [ "$CURRENT" != "$PREVIOUS" ]; then
+      if s6-svc -h /etc/s6/stunnel; then
+        echo 'Certificate changed: reloaded stunnel'
+      else
+        echo 'Certificate changed but reload failed; retrying'
+        sleep 20
+        continue
+      fi
+    fi
+    PREVIOUS="$CURRENT"
+  fi
+  sleep 300
+done
