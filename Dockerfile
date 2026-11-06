@@ -10,3 +10,4 @@ COPY stunnel.conf /etc/stunnel/stunnel.conf
 COPY s6/stunnel/run /etc/s6/stunnel/run
 COPY s6/cert-watch/run /etc/s6/cert-watch/run
 RUN chmod 755 /etc/s6/stunnel/run /etc/s6/cert-watch/run
+COPY apt-cacher-ng/zzzz_https.conf /etc/apt-cacher-ng/zzzz_https.conf

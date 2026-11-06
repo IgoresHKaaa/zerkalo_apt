@@ -1,0 +1,9 @@
+services:
+  certbot:
+    image: certbot/certbot:latest
+    container_name: acng-certbot
+    volumes:
+      - ./letsencrypt:/etc/letsencrypt
+    command: certonly --standalone --preferred-challenges http --non-interactive --keep-until-expiring --email email@email.com --agree-tos --domain ${BACKEND_DOMAIN}
+    ports:
+      - "80:80"
