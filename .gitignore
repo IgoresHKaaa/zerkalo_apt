@@ -12,7 +12,6 @@ cache/
 logs/
 data/
 .env
-.env.*
 *.secret
 *.tmp
 *.bak

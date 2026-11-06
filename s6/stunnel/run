@@ -1,2 +1,21 @@
 #!/bin/sh
-exec /usr/bin/stunnel4 /etc/stunnel/stunnel.conf
+set -eu
+
+: "${BACKEND_DOMAIN:?BACKEND_DOMAIN is not set}"
+case "$BACKEND_DOMAIN" in
+  *[!a-zA-Z0-9.-]* | '' | .* | *..* | *.)
+    echo "Invalid BACKEND_DOMAIN" >&2
+    exit 1
+    ;;
+esac
+
+CERT_DIR="/etc/letsencrypt/live/$BACKEND_DOMAIN"
+if [ ! -r "$CERT_DIR/fullchain.pem" ] || [ ! -r "$CERT_DIR/privkey.pem" ]; then
+  echo "Certificate/key not readable: $CERT_DIR" >&2
+  exit 1
+fi
+
+sed "s|__BACKEND_DOMAIN__|$BACKEND_DOMAIN|g" \
+  /etc/stunnel/stunnel.conf.template > /run/stunnel/stunnel.conf
+
+exec /usr/bin/stunnel4 /run/stunnel/stunnel.conf
