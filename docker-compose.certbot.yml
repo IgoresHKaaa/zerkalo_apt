@@ -1,17 +1,19 @@
 services:
   certbot:
     image: certbot/certbot:latest
-    container_name: acng-certbot
-    restart: unless-stopped
+    restart: "no"
     ports:
       - "80:80"
     volumes:
       - ./letsencrypt:/etc/letsencrypt
       - ./letsencrypt-lib:/var/lib/letsencrypt
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - |
-        while :; do
-          certbot renew --standalone --non-interactive --preferred-challenges http;
-          sleep 43200;
-        done
+    command: >
+      certonly
+      --standalone
+      --non-interactive
+      --keep-until-expiring
+      --preferred-challenges http
+      --agree-tos
+      --no-eff-email
+      --email ${CERTBOT_EMAIL}
+      --domain ${BACKEND_DOMAIN}
